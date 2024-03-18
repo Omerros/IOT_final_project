@@ -1,6 +1,8 @@
 package com.example.chaquopy_tutorial;
 
-public class DogProfile {
+import java.io.Serializable;
+
+public class DogProfile implements Serializable {
     private String name;
     private String breed;
     private String photoPath;
@@ -13,7 +15,7 @@ public class DogProfile {
         this.targetSteps = targetSteps;
     }
 
-    // Getters
+    // Getters and setters
     public String getName() {
         return name;
     }
@@ -28,22 +30,5 @@ public class DogProfile {
 
     public int getTargetSteps() {
         return targetSteps;
-    }
-
-    // Setters
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setBreed(String breed) {
-        this.breed = breed;
-    }
-
-    public void setPhotoPath(String photoPath) {
-        this.photoPath = photoPath;
-    }
-
-    public void setTargetSteps(int targetSteps) {
-        this.targetSteps = targetSteps;
     }
 }

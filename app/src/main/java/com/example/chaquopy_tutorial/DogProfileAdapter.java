@@ -10,6 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 public class DogProfileAdapter extends RecyclerView.Adapter<DogProfileAdapter.ViewHolder> {
@@ -34,7 +36,12 @@ public class DogProfileAdapter extends RecyclerView.Adapter<DogProfileAdapter.Vi
         holder.tvDogName.setText(profile.getName());
         holder.tvDogBreed.setText(profile.getBreed());
         holder.tvTargetSteps.setText("Target Steps: " + profile.getTargetSteps());
-        // TODO: Set the dog photo using Glide or another image loading library
+
+        if (!profile.getPhotoPath().isEmpty()) {
+            Glide.with(context)
+                    .load(profile.getPhotoPath())
+                    .into(holder.imgDogPhoto);
+        }
     }
 
     @Override

@@ -20,5 +20,4 @@
         android:layout_margin="16dp"
         android:layout_alignParentEnd="true"
         app:srcCompat="@android:drawable/ic_input_add" />
-
 </RelativeLayout>

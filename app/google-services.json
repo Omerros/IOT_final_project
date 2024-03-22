@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "892299864466",
+    "firebase_url": "https://iot-final-project-64ef1-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "iot-final-project-64ef1",
+    "storage_bucket": "iot-final-project-64ef1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:892299864466:android:398e6c671f49a709d1b94b",
+        "android_client_info": {
+          "package_name": "com.example.chaquopy_tutorial"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxShv4o36lsrZk03BGI5Fiwb3FxTRJBaY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

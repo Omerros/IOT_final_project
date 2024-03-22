@@ -44,34 +44,36 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        dogs = new ArrayList<>();
+        recyclerView = findViewById(R.id.recyclerView);
+        btnAddProfile = findViewById(R.id.btnAddProfile);
+
+        dogProfiles = new ArrayList<>();
+
+        adapter = new DogProfileAdapter(MainActivity.this, dogProfiles);
+        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        recyclerView.setAdapter(adapter);
+
         dRef = FirebaseDatabase.getInstance().getReference("dogs");
         dRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                   for (DataSnapshot dogSnapshot : dataSnapshot.getChildren()) {
-                       DogProfile dog = dogSnapshot.getValue(DogProfile.class);
-                       Log.i("firebase", "Read new dog: " + dog);
-                       dogs.add(dog);
-                   }
+                    dogProfiles.clear();
+                    
+                    for (DataSnapshot dogSnapshot : dataSnapshot.getChildren()) {
+                        DogProfile dog = dogSnapshot.getValue(DogProfile.class);
+                        Log.i("firebase", "Read new dog: " + dog);
+                        dogProfiles.add(dog);
+                    }
+                    // Notify adapter after adding data
+                    adapter.notifyDataSetChanged();
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
-
-        addNewDog(123, "Max", "Labrador", "path/to/photo", 10000);
-        recyclerView = findViewById(R.id.recyclerView);
-        btnAddProfile = findViewById(R.id.btnAddProfile);
-        dogProfiles = new ArrayList<>();
-
-        adapter = new DogProfileAdapter(this, dogProfiles);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
 
         btnAddProfile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,22 +82,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, ADD_DOG_PROFILE_REQUEST_CODE);
             }
         });
-    }
-    public void addNewDog(int id, String name, String breed, String photoPath, int targetSteps) {
-        DogProfile newDog = new DogProfile(id, name, breed, photoPath, targetSteps);
-        dRef.child(String.valueOf(newDog.getId())).setValue(newDog)
-            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    Log.i("firebase", "Dog added successfully to the database");
-                }
-            })
-            .addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.i("firebase", "Failed to add dog to the database: " + e.getMessage());
-                }
-            });
     }
 
     @Override

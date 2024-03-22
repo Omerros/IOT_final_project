@@ -49,10 +49,11 @@ public class AddDogProfileActivity extends Activity {
                 String name = etName.getText().toString();
                 String breed = spinnerDogBreed.getSelectedItem().toString();
                 int targetSteps = Integer.parseInt(etTargetSteps.getText().toString());
-
-                DogProfile newProfile = new DogProfile(name, breed, photoPath, targetSteps);
+                // random number between 0 - 1000
+                int id = (int)(Math.random() * (1000 - 0 + 1));
+                DogProfile newDog = DogManager.addNewDog(id, name, breed, photoPath, targetSteps);
                 Intent resultIntent = new Intent();
-                resultIntent.putExtra("newDogProfile", newProfile);
+                resultIntent.putExtra("newDogProfile", newDog);
                 setResult(RESULT_OK, resultIntent);
                 finish();
             }
@@ -98,5 +99,4 @@ public class AddDogProfileActivity extends Activity {
             }
         }
     }
-
 }

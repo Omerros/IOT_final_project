@@ -20,6 +20,8 @@ public class MainActivity extends AppCompatActivity {
     private List<DogProfile> dogProfiles;
     private FloatingActionButton btnAddProfile;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

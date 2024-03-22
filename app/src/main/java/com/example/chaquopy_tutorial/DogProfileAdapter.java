@@ -1,6 +1,7 @@
 package com.example.chaquopy_tutorial;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -42,6 +44,13 @@ public class DogProfileAdapter extends RecyclerView.Adapter<DogProfileAdapter.Vi
                     .load(profile.getPhotoPath())
                     .into(holder.imgDogPhoto);
         }
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, DogDetailsActivity.class);
+            intent.putExtra("dogProfile", profile);
+            context.startActivity(intent);
+        });
+
     }
 
     @Override

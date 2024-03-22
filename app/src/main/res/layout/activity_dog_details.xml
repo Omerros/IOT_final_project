@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/dogImage"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center_horizontal"
+        android:src="@mipmap/ic_launcher_round" />
+
+    <TextView
+        android:id="@+id/dogName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Dog Name"
+        android:textSize="24sp"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/btnShowProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show Progress"
+        android:layout_marginTop="16dp"/>
+
+    <Button
+        android:id="@+id/btnStartWalk"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Walk"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/btnSetAlarm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Set Alarm"
+        android:layout_marginTop="8dp"/>
+</LinearLayout>

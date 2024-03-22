@@ -20,4 +20,11 @@
         android:layout_margin="16dp"
         android:layout_alignParentEnd="true"
         app:srcCompat="@android:drawable/ic_input_add" />
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/btnAddProfile"/>
+
 </RelativeLayout>
+

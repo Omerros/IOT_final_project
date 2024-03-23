@@ -19,12 +19,97 @@
         android:textSize="24sp"
         android:layout_marginTop="8dp"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/btnWeekly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Weekly"
+            android:textSize="18sp"/>
+
+        <Button
+            android:id="@+id/btnMonthly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Monthly"
+            android:textSize="18sp"
+            android:layout_marginStart="16dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <ImageButton
+            android:id="@+id/btnPrev"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_arrow_left"
+            android:contentDescription="@string/next" />
+
+        <TextView
+            android:id="@+id/tvCurrentTimeFrame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Week 1"
+            android:textSize="18sp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
+
+        <ImageButton
+            android:id="@+id/btnNext"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_arrow_right"
+            android:contentDescription="@string/next" />
+    </LinearLayout>
+
     <com.github.mikephil.charting.charts.BarChart
         android:id="@+id/barChart"
         android:layout_width="match_parent"
-        android:layout_height="279dp"
+        android:layout_height="251dp"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="400dp"
-        android:layout_weight="1" />
+        android:layout_marginBottom="16dp" />
 
+    <TextView
+        android:id="@+id/progressToday"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Progress Today: 0%"
+        android:textSize="18sp"
+        android:layout_marginTop="8dp"/>
+
+    <ProgressBar
+        android:id="@+id/progressBarToday"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="37dp"
+        android:layout_marginTop="8dp"
+        android:max="100"
+        android:progress="0" />
+
+    <TextView
+        android:id="@+id/avgSteps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Avg Steps: 0"
+        android:textSize="18sp"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/avgKm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Avg Km: 0.0"
+        android:textSize="18sp"
+        android:layout_marginTop="8dp"/>
 </LinearLayout>

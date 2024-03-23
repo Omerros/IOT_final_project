@@ -1,22 +1,44 @@
 package com.example.chaquopy_tutorial;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
+
+import android.Manifest;
+import android.os.Build;
+import androidx.core.content.ContextCompat;
+
+import java.io.File;
 
 public class DogDetailsActivity extends AppCompatActivity {
 
+    private static final int REQUEST_STORAGE_PERMISSION = 100;
     private ImageView dogImage;
     private TextView dogName;
     private Button btnShowProgress, btnStartWalk, btnSetAlarm;
 
+    @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,19 +53,48 @@ public class DogDetailsActivity extends AppCompatActivity {
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnSetAlarm = findViewById(R.id.btnSetAlarm);
 
+        // Check and request storage permission if needed
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestStoragePermission();
+            }
+        }
+
         Intent intent = getIntent();
         DogProfile dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
         if (dogProfile != null) {
             dogName.setText(dogProfile.getName());
-            Glide.with(this)
-                    .load(dogProfile.getPhotoPath())
-                    .error(R.drawable.ic_launcher_background) // Add a placeholder for errors
-                    .into(dogImage);
+            String photoPath = dogProfile.getPhotoPath();
+            Log.d("image_loader", "Photo path: " + photoPath);
 
+            RequestOptions requestOptions = new RequestOptions();
+            requestOptions.error(R.drawable.ic_launcher_background);
+
+            if (photoPath != null && !photoPath.isEmpty()) {
+
+                Glide.with(this)
+                        .load(photoPath)
+                        .apply(requestOptions)
+                        .listener(new RequestListener<Drawable>() {
+                            @Override
+                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                Log.e("image_loader", "Failed to load image", e);
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                Log.d("image_loader", "Image loaded successfully");
+                                return false;
+                            }
+                        })
+                        .into(dogImage);
+            } else {
+                Log.e("image_loader", "Invalid photo path: " + photoPath);
+            }
         }
-
         // Set up listeners for the buttons
-        // Example:
         btnShowProgress.setOnClickListener(v -> {
             Intent progressIntent = new Intent(DogDetailsActivity.this, ProgressChartActivity.class);
             startActivity(progressIntent);
@@ -54,6 +105,24 @@ public class DogDetailsActivity extends AppCompatActivity {
         btnSetAlarm.setOnClickListener(v -> {
             // Handle "Set Alarm" button click
         });
+    }
+    // Method to request storage permission
+    private void requestStoragePermission() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                REQUEST_STORAGE_PERMISSION);
+    }
+    // Override onRequestPermissionsResult to handle permission request result
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_STORAGE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, you can now access the storage
+            } else {
+                // Permission denied, handle accordingly (e.g., show a message to the user)
+            }
+        }
     }
 
     @Override

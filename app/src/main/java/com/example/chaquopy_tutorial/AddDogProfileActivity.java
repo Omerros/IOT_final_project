@@ -72,7 +72,8 @@ public class AddDogProfileActivity extends Activity {
                     Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     startActivityForResult(takePicture, TAKE_PHOTO_REQUEST);
                 } else if (options[which].equals("Choose from Gallery")) {
-                    Intent pickPhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    Intent pickPhoto = new Intent(Intent.ACTION_PICK);
+                    pickPhoto.setType("image/*");
                     startActivityForResult(pickPhoto, PICK_IMAGE_REQUEST);
                 } else if (options[which].equals("Cancel")) {
                     dialog.dismiss();
@@ -94,8 +95,7 @@ public class AddDogProfileActivity extends Activity {
                 Bundle extras = data.getExtras();
                 Bitmap imageBitmap = (Bitmap) extras.get("data");
                 imgDogPhoto.setImageBitmap(imageBitmap);
-                // Save the image path
-                // You'll need to implement logic to save the bitmap to storage and get its path
+                photoPath = Utils.FileUtil.saveBitmapToInternalStorage(this, imageBitmap);
             }
         }
     }

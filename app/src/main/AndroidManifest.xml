@@ -35,6 +35,7 @@
         <activity android:name=".AddDogProfileActivity" />
         <activity android:name=".DogDetailsActivity" />
         <activity android:name=".ProgressChartActivity" />
+        <activity android:name=".StartWalkActivity" />
 
     </application>
 </manifest>

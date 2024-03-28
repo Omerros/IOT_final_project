@@ -100,7 +100,8 @@ public class DogDetailsActivity extends AppCompatActivity {
             startActivity(progressIntent);
         });
         btnStartWalk.setOnClickListener(v -> {
-            // Handle "Start Walk" button click
+            Intent startWalkIntent = new Intent(DogDetailsActivity.this, StartWalkActivity.class);
+            startActivity(startWalkIntent);
         });
         btnSetAlarm.setOnClickListener(v -> {
             // Handle "Set Alarm" button click

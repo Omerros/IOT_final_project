@@ -20,6 +20,21 @@
         android:visibility="gone"
         android:layout_marginBottom="16dp"/>
 
+    <TextView
+        android:id="@+id/tvStepCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Step Count: "
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/etTargetValue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter target value"
+        android:inputType="number"
+        android:layout_marginBottom="16dp"/>
+
     <Button
         android:id="@+id/btnStartWalk"
         android:layout_width="match_parent"

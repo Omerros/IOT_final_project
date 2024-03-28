@@ -25,7 +25,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -34,7 +33,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 public class ProgressChartActivity extends AppCompatActivity {
 
@@ -50,11 +48,22 @@ public class ProgressChartActivity extends AppCompatActivity {
     private Map<Integer, String> weeklyIndex = new LinkedHashMap<>();
 
     private int currentWeek = 1; // Start with the current week as week 1
+    private int maxWeek = 1; // Start with the current week as week 1
     private int currentMonth = 1; // Start with the current week as week 1
     private Map<Integer, List<Integer>> weeklyData = new LinkedHashMap<>();
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
+    private String[] allDays = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     private boolean isMonthlyView = false; // Flag to track the current view
+
+    private int blue = Color.rgb(74, 144, 226); // #4A90E2
+    private int green = Color.rgb(126, 211, 33); // #7ED321
+    private int red = Color.rgb(208, 2, 27); // #D0021B
+
+    int avgSteps;
+    double avgKm;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +120,7 @@ public class ProgressChartActivity extends AppCompatActivity {
                     updateChart(tvCurrentWeek);
                 }
             } else {
-                if (currentWeek < weeklyData.size()-1) {
+                if (currentWeek < weeklyData.size()) {
                     currentWeek++;
                     updateChart(tvCurrentWeek);
                 }
@@ -136,15 +145,12 @@ public class ProgressChartActivity extends AppCompatActivity {
     private void updateChart(TextView tvCurrentWeek) {
         if (isMonthlyView) {
             List<Integer> stepsOfMonth = monthlyData.get(currentMonth);
-            List<String> monthDays = stepsOfMonth.stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.toList());
+            List<String> monthDays = monthlyDates.get(currentMonth); // Use the list of dates for the X-axis labels
             if (stepsOfMonth != null) {
-                setupBarChartMonthly(stepsOfMonth, monthDays); // Use the same method for setting up the chart
+                setupBarChartMonthly(stepsOfMonth, monthDays); // Pass the list of dates as a parameter
             }
 
             tvCurrentWeek.setText(monthlyIndex.get(currentMonth));
-
         }
             // Update the chart to show monthly data
             // Example: setupBarChartMonthly(monthlyData);
@@ -175,19 +181,37 @@ public class ProgressChartActivity extends AppCompatActivity {
     }
     private void setupBarChartMonthly(List<Integer> stepsOfMonth, List<String> monthDays) {
         List<BarEntry> entries = new ArrayList<>();
+        List<Integer> colors = new ArrayList<>();
+        String todayDate = dateFormat.format(Calendar.getInstance().getTime());
+
         for (int i = 0; i < stepsOfMonth.size(); i++) {
             entries.add(new BarEntry(i, stepsOfMonth.get(i)));
+
+            if (monthDays.get(i).equals(todayDate)) {
+                colors.add(blue); // Today's bar
+            } else if (stepsOfMonth.get(i) >= targetSteps) {
+                colors.add(green); // Above/equal target
+            } else {
+                colors.add(red); // Below target
+            }
         }
 
         BarDataSet dataSet = new BarDataSet(entries, "Monthly Steps");
-        dataSet.setColor(Color.BLUE);
+        dataSet.setColors(colors);
         BarData barData = new BarData(dataSet);
 
+        List<String> formattedLabels = new ArrayList<>();
+        for (String date : monthDays) {
+            // Format each date to remove the year
+            String formattedDate = date.substring(0, date.length() - 5);
+            formattedLabels.add(formattedDate);
+        }
         XAxis xAxis = barChart.getXAxis();
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(monthDays));
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(formattedLabels));
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
         xAxis.setGranularityEnabled(true);
+        xAxis.setLabelRotationAngle(325);
 
         barChart.setData(barData);
         barChart.getDescription().setEnabled(false);
@@ -196,14 +220,39 @@ public class ProgressChartActivity extends AppCompatActivity {
         barChart.invalidate();
     }
 
+
+
+
     private void setupBarChartWeekly(List<Integer> stepsOfWeek, List<String> weekDays) {
         List<BarEntry> entries = new ArrayList<>();
+        List<Integer> colors = new ArrayList<>();
+        int dayOfWeekIndex = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+        String dayOfWeekString = allDays[dayOfWeekIndex-1 ];
+        int count = 0;
+        int sum = 0;
         for (int i = 0; i < stepsOfWeek.size(); i++) {
-            entries.add(new BarEntry(i, stepsOfWeek.get(i)));
+            int stepsOfDay = stepsOfWeek.get(i);
+            sum = sum + stepsOfDay;
+            if (stepsOfDay>0){
+                count = i;
+            }
+            entries.add(new BarEntry(i, stepsOfDay));
+            Log.i("bolbol", dayOfWeekString);
+            Log.i("bolbol", weekDays.get(i));
+
+            if (dayOfWeekString.equals(weekDays.get(i)) && currentWeek == maxWeek) {
+                colors.add(blue); // Today's bar
+            } else if (stepsOfWeek.get(i) >= targetSteps) {
+                colors.add(green); // Above/equal target
+            } else {
+                colors.add(red); // Below target
+            }
         }
+        avgSteps = sum/count;
+        avgKm = Math.round(100*0.3*avgSteps)/ 100.0;
 
         BarDataSet dataSet = new BarDataSet(entries, "Steps");
-        dataSet.setColor(Color.BLUE);
+        dataSet.setColors(colors);
         BarData barData = new BarData(dataSet);
 
         XAxis xAxis = barChart.getXAxis();
@@ -211,6 +260,7 @@ public class ProgressChartActivity extends AppCompatActivity {
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
         xAxis.setGranularityEnabled(true);
+        xAxis.setLabelRotationAngle(0);
 
         barChart.setData(barData);
         barChart.getDescription().setEnabled(false);
@@ -218,6 +268,7 @@ public class ProgressChartActivity extends AppCompatActivity {
         barChart.animateY(1000);
         barChart.invalidate();
     }
+
     private void logStepsData() {
         for (Map.Entry<String, Integer> entry : stepsData.entrySet()) {
             Log.i("StepsData", "Date: " + entry.getKey() + ", Steps: " + entry.getValue());
@@ -227,7 +278,7 @@ public class ProgressChartActivity extends AppCompatActivity {
         logStepsData();
         Calendar calendar = Calendar.getInstance();
         int count = 0;
-        int weekKey = 0;
+        int weekKey = 1; // Start with week 1
         String firstDateWeek = "";
         String lastDateWeek;
         for (Map.Entry<String, Integer> entry : stepsData.entrySet()) {
@@ -238,20 +289,23 @@ public class ProgressChartActivity extends AppCompatActivity {
             int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1; // Convert to 0-based index
             stepsOfWeek.set(dayOfWeek, entry.getValue());
             weeklyData.put(weekKey, stepsOfWeek);
-            if(count==0) {
-                weekKey++;
+            if (count == 0) {
                 firstDateWeek = entry.getKey();
             }
-            if(count==6){
+            if (count == 6) {
                 currentWeek = weekKey;
+                maxWeek = weekKey;
                 lastDateWeek = entry.getKey();
                 weeklyIndex.put(weekKey, firstDateWeek + "-" + lastDateWeek);
+                weekKey++; // Increment the weekKey only after a full week has been processed
                 count = -1;
-
             }
             count++;
         }
     }
+
+    private Map<Integer, List<String>> monthlyDates = new LinkedHashMap<>(); // Add this line at the beginning of the class
+
     private void separateMonthlyData() throws ParseException {
         Calendar calendar = Calendar.getInstance();
         String lastDate = new ArrayList<>(stepsDataMonthly.keySet()).get(stepsDataMonthly.size() - 1);
@@ -268,14 +322,20 @@ public class ProgressChartActivity extends AppCompatActivity {
             List<Integer> stepsOfMonth = monthlyData.containsKey(monthKey) ?
                     new ArrayList<>(monthlyData.get(monthKey)) : new ArrayList<>(Collections.nCopies(daysInMonth, 0));
 
+            List<String> datesOfMonth = monthlyDates.containsKey(monthKey) ?
+                    new ArrayList<>(monthlyDates.get(monthKey)) : new ArrayList<>(Collections.nCopies(daysInMonth, ""));
+
             int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH) - 1; // Convert to 0-based index
             stepsOfMonth.set(dayOfMonth, entry.getValue());
+            datesOfMonth.set(dayOfMonth, entry.getKey());
             monthlyData.put(monthKey, stepsOfMonth);
+            monthlyDates.put(monthKey, datesOfMonth);
 
             monthlyIndex.put(monthKey, months[monthKey-1]);
             currentMonth = monthKey;
         }
     }
+
 
 
 
@@ -286,7 +346,6 @@ public class ProgressChartActivity extends AppCompatActivity {
         int firstDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 
         // Generate the list of week days starting from the first day
-        String[] allDays = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
         List<String> weekDays = new ArrayList<>();
         for (int i = firstDayOfWeek - 1; i < allDays.length; i++) {
             weekDays.add(allDays[i]);
@@ -301,6 +360,8 @@ public class ProgressChartActivity extends AppCompatActivity {
     private void populateStepsData() {
         // Populate your stepsData here
         // Example:
+        stepsData.put("06/01/2024", 9500);
+        stepsData.put("07/01/2024", 9500);
         stepsData.put("11/01/2024", 9500);
         stepsData.put("11/02/2024", 9500);
         stepsData.put("11/03/2024", 13500);
@@ -309,6 +370,12 @@ public class ProgressChartActivity extends AppCompatActivity {
         stepsData.put("16/03/2024", 11000);
         stepsData.put("19/03/2024", 9500);
         stepsData.put("20/03/2024", 9000);
+        stepsData.put("24/03/2024", 11500);
+        stepsData.put("25/03/2024", 11000);
+        stepsData.put("26/03/2024", 9500);
+        stepsData.put("27/03/2024", 9000);
+        stepsData.put("28/03/2024", 3500);
+
         // Add more data...
 
         // Fill in the missing dates and ensure the range starts with Sunday and ends with Saturday

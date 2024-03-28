@@ -66,7 +66,7 @@ public class DogDetailsActivity extends AppCompatActivity {
         if (dogProfile != null) {
             dogName.setText(dogProfile.getName());
             String photoPath = dogProfile.getPhotoPath();
-            Log.d("image_loader", "Photo path: " + photoPath);
+            Log.d("image_loader_details", "Photo path: " + photoPath);
 
             RequestOptions requestOptions = new RequestOptions();
             requestOptions.error(R.drawable.ic_launcher_background);
@@ -79,24 +79,25 @@ public class DogDetailsActivity extends AppCompatActivity {
                         .listener(new RequestListener<Drawable>() {
                             @Override
                             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                Log.e("image_loader", "Failed to load image", e);
+                                Log.e("image_loader_details", "Failed to load image", e);
                                 return false;
                             }
 
                             @Override
                             public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                Log.d("image_loader", "Image loaded successfully");
+                                Log.d("image_loader_details", "Image loaded successfully");
                                 return false;
                             }
                         })
                         .into(dogImage);
             } else {
-                Log.e("image_loader", "Invalid photo path: " + photoPath);
+                Log.e("image_loader_details", "Invalid photo path: " + photoPath);
             }
         }
         // Set up listeners for the buttons
         btnShowProgress.setOnClickListener(v -> {
             Intent progressIntent = new Intent(DogDetailsActivity.this, ProgressChartActivity.class);
+            progressIntent.putExtra("dogProfile", dogProfile);
             startActivity(progressIntent);
         });
         btnStartWalk.setOnClickListener(v -> {

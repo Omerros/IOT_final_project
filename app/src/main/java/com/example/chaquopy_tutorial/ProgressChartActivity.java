@@ -1,6 +1,9 @@
 package com.example.chaquopy_tutorial;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -14,8 +17,15 @@ import java.time.DayOfWeek;
 import java.util.Date;
 import java.util.LinkedHashMap;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -39,10 +49,10 @@ import java.util.TreeMap;
 public class ProgressChartActivity extends AppCompatActivity {
 
     private BarChart barChart;
-    private ImageView profileImage; //TODO
-    private TextView profileName; //TODO
-    private int targetSteps = 10000; //TODO
-    private Map<String, Integer> stepsData = new LinkedHashMap<>(); //TODO
+    private ImageView dogImage;
+    private TextView dogName;
+    private int targetSteps = 10000; // Example target steps
+    private Map<String, Integer> stepsData = new LinkedHashMap<>();
 
     private Map<String, Integer> stepsDataMonthly = new LinkedHashMap<>();
     private Map<Integer, List<Integer>> monthlyData = new LinkedHashMap<>();
@@ -70,14 +80,15 @@ public class ProgressChartActivity extends AppCompatActivity {
     private TextView tvProgressToday;
     private ProgressBar progressBarToday;
     private int todaySteps = 0;
+    @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_progress_chart);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        profileImage = findViewById(R.id.profileImage);
-        profileName = findViewById(R.id.profileName);
+        dogImage = findViewById(R.id.dogImage);
+        dogName = findViewById(R.id.dogName);
         barChart = findViewById(R.id.barChart);
 
         tvAvgSteps = findViewById(R.id.avgSteps);
@@ -91,6 +102,42 @@ public class ProgressChartActivity extends AppCompatActivity {
         TextView tvCurrentWeek = findViewById(R.id.tvCurrentTimeFrame);
         Button btnWeeklyView = findViewById(R.id.btnWeeklyView);
         Button btnMonthlyView = findViewById(R.id.btnMonthlyView);
+
+        // Load the dog image
+        Intent intent = getIntent();
+        DogProfile dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
+        Log.d("image_loader_chart", "null dogo");
+        if (dogProfile != null) {
+            dogName.setText(dogProfile.getName());
+            String photoPath = dogProfile.getPhotoPath();
+            Log.d("image_loader_chart", "Photo path: " + photoPath);
+
+            RequestOptions requestOptions = new RequestOptions();
+            requestOptions.error(R.drawable.ic_launcher_background);
+
+            if (photoPath != null && !photoPath.isEmpty()) {
+
+                Glide.with(this)
+                        .load(photoPath)
+                        .apply(requestOptions)
+                        .listener(new RequestListener<Drawable>() {
+                            @Override
+                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                Log.e("image_loader_chart", "Failed to load image", e);
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                Log.d("image_loader_chart", "Image loaded successfully");
+                                return false;
+                            }
+                        })
+                        .into(dogImage);
+            } else {
+                Log.e("image_loader", "Invalid photo path: " + photoPath);
+            }
+        }
 
         // Populate stepsData with your data
         populateStepsData();

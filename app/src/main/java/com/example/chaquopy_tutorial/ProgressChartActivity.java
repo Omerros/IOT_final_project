@@ -7,9 +7,11 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.time.DayOfWeek;
+import java.util.Date;
 import java.util.LinkedHashMap;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -37,10 +39,10 @@ import java.util.TreeMap;
 public class ProgressChartActivity extends AppCompatActivity {
 
     private BarChart barChart;
-    private ImageView profileImage;
-    private TextView profileName;
-    private int targetSteps = 10000; // Example target steps
-    private Map<String, Integer> stepsData = new LinkedHashMap<>();
+    private ImageView profileImage; //TODO
+    private TextView profileName; //TODO
+    private int targetSteps = 10000; //TODO
+    private Map<String, Integer> stepsData = new LinkedHashMap<>(); //TODO
 
     private Map<String, Integer> stepsDataMonthly = new LinkedHashMap<>();
     private Map<Integer, List<Integer>> monthlyData = new LinkedHashMap<>();
@@ -63,8 +65,11 @@ public class ProgressChartActivity extends AppCompatActivity {
     int avgSteps;
     double avgKm;
 
-
-
+    private TextView tvAvgSteps;
+    private TextView tvAvgKm;
+    private TextView tvProgressToday;
+    private ProgressBar progressBarToday;
+    private int todaySteps = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +79,12 @@ public class ProgressChartActivity extends AppCompatActivity {
         profileImage = findViewById(R.id.profileImage);
         profileName = findViewById(R.id.profileName);
         barChart = findViewById(R.id.barChart);
+
+        tvAvgSteps = findViewById(R.id.avgSteps);
+        tvAvgKm = findViewById(R.id.avgKm);
+        tvProgressToday = findViewById(R.id.progressToday);
+        progressBarToday = findViewById(R.id.progressBarToday);
+
 
         ImageButton btnPrev = findViewById(R.id.btnPrev);
         ImageButton btnNext = findViewById(R.id.btnNext);
@@ -183,10 +194,16 @@ public class ProgressChartActivity extends AppCompatActivity {
         List<BarEntry> entries = new ArrayList<>();
         List<Integer> colors = new ArrayList<>();
         String todayDate = dateFormat.format(Calendar.getInstance().getTime());
-
+        int count = 1;
+        int sum = 0;
         for (int i = 0; i < stepsOfMonth.size(); i++) {
-            entries.add(new BarEntry(i, stepsOfMonth.get(i)));
+            int stepsOfDay = stepsOfMonth.get(i);
+            entries.add(new BarEntry(i, stepsOfDay));
 
+            sum = sum + stepsOfDay;
+            if (stepsOfDay>0){
+                count = i+1;
+            }
             if (monthDays.get(i).equals(todayDate)) {
                 colors.add(blue); // Today's bar
             } else if (stepsOfMonth.get(i) >= targetSteps) {
@@ -195,6 +212,8 @@ public class ProgressChartActivity extends AppCompatActivity {
                 colors.add(red); // Below target
             }
         }
+        avgSteps = sum/count;
+        avgKm = Math.round(100*0.3*avgSteps)/ 100.0;
 
         BarDataSet dataSet = new BarDataSet(entries, "Monthly Steps");
         dataSet.setColors(colors);
@@ -218,9 +237,8 @@ public class ProgressChartActivity extends AppCompatActivity {
         barChart.getLegend().setEnabled(false);
         barChart.animateY(1000);
         barChart.invalidate();
+        updateTextViews();
     }
-
-
 
 
     private void setupBarChartWeekly(List<Integer> stepsOfWeek, List<String> weekDays) {
@@ -228,13 +246,13 @@ public class ProgressChartActivity extends AppCompatActivity {
         List<Integer> colors = new ArrayList<>();
         int dayOfWeekIndex = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
         String dayOfWeekString = allDays[dayOfWeekIndex-1 ];
-        int count = 0;
+        int count = 1;
         int sum = 0;
         for (int i = 0; i < stepsOfWeek.size(); i++) {
             int stepsOfDay = stepsOfWeek.get(i);
             sum = sum + stepsOfDay;
             if (stepsOfDay>0){
-                count = i;
+                count = i+1;
             }
             entries.add(new BarEntry(i, stepsOfDay));
             Log.i("bolbol", dayOfWeekString);
@@ -267,6 +285,17 @@ public class ProgressChartActivity extends AppCompatActivity {
         barChart.getLegend().setEnabled(false);
         barChart.animateY(1000);
         barChart.invalidate();
+        updateTextViews();
+    }
+
+    private void updateTextViews() {
+        tvAvgSteps.setText(String.format(Locale.getDefault(), "Avg Steps: %d", avgSteps));
+        tvAvgKm.setText(String.format(Locale.getDefault(), "Avg Km: %.2f km", avgKm));
+        double progressPercentage = ((double) todaySteps / targetSteps) * 100;
+        tvProgressToday.setText(String.format(Locale.getDefault(), "Progress Today: %.0f%%", progressPercentage));
+
+        int progress = (int) ((double) todaySteps / targetSteps * 100);
+        progressBarToday.setProgress(progress);
     }
 
     private void logStepsData() {
@@ -279,9 +308,13 @@ public class ProgressChartActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         int count = 0;
         int weekKey = 1; // Start with week 1
+        String todayDate = dateFormat.format(new Date());
+        todaySteps = stepsData.getOrDefault(todayDate, 0);
+
         String firstDateWeek = "";
         String lastDateWeek;
         for (Map.Entry<String, Integer> entry : stepsData.entrySet()) {
+
             calendar.setTime(dateFormat.parse(entry.getKey()));
             List<Integer> stepsOfWeek = weeklyData.containsKey(weekKey) ?
                     new ArrayList<>(weeklyData.get(weekKey)) : Arrays.asList(0, 0, 0, 0, 0, 0, 0);

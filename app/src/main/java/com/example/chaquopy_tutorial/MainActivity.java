@@ -49,17 +49,18 @@ public class MainActivity extends AppCompatActivity {
 
         dogProfiles = new ArrayList<>();
 
-        adapter = new DogProfileAdapter(MainActivity.this, dogProfiles);
+        dRef = FirebaseDatabase.getInstance().getReference("dogs");
+
+        adapter = new DogProfileAdapter(MainActivity.this, dogProfiles, dRef);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         recyclerView.setAdapter(adapter);
 
-        dRef = FirebaseDatabase.getInstance().getReference("dogs");
         dRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     dogProfiles.clear();
-                    
+
                     for (DataSnapshot dogSnapshot : dataSnapshot.getChildren()) {
                         DogProfile dog = dogSnapshot.getValue(DogProfile.class);
                         Log.i("firebase", "Read new dog: " + dog);

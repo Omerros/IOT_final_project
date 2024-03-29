@@ -7,22 +7,28 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
 public class DogProfileAdapter extends RecyclerView.Adapter<DogProfileAdapter.ViewHolder> {
     private Context context;
     private List<DogProfile> dogProfiles;
+    private DatabaseReference dRef;
 
-    public DogProfileAdapter(Context context, List<DogProfile> dogProfiles) {
+    public DogProfileAdapter(Context context, List<DogProfile> dogProfiles, DatabaseReference dRef) {
         this.context = context;
         this.dogProfiles = dogProfiles;
+        this.dRef = dRef;
     }
 
     @NonNull
@@ -51,6 +57,12 @@ public class DogProfileAdapter extends RecyclerView.Adapter<DogProfileAdapter.Vi
             context.startActivity(intent);
         });
 
+        holder.btnDelete.setOnClickListener(v -> {
+            int adapterPosition = holder.getAdapterPosition();
+            if (adapterPosition != RecyclerView.NO_POSITION) {
+                deleteDogProfile(adapterPosition);
+            }
+        });
     }
 
     @Override
@@ -61,6 +73,7 @@ public class DogProfileAdapter extends RecyclerView.Adapter<DogProfileAdapter.Vi
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvDogName, tvDogBreed, tvTargetSteps;
         ImageView imgDogPhoto;
+        ImageView btnDelete;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -68,6 +81,28 @@ public class DogProfileAdapter extends RecyclerView.Adapter<DogProfileAdapter.Vi
             tvDogBreed = itemView.findViewById(R.id.tvDogBreed);
             tvTargetSteps = itemView.findViewById(R.id.tvTargetSteps);
             imgDogPhoto = itemView.findViewById(R.id.imgDogPhoto);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
         }
+    }
+
+    private void deleteDogProfile(int position) {
+        DogProfile dogProfile = dogProfiles.get(position);
+        String id = String.valueOf(dogProfile.getId());
+
+        dRef.child(id).removeValue()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        dogProfiles.remove(position);
+                        notifyItemRemoved(position);
+                        Toast.makeText(context, "Profile deleted", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(context, "Failed to delete profile", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

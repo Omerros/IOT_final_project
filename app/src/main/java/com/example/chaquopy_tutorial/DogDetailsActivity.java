@@ -105,7 +105,8 @@ public class DogDetailsActivity extends AppCompatActivity {
             startActivity(startWalkIntent);
         });
         btnSetAlarm.setOnClickListener(v -> {
-            // Handle "Set Alarm" button click
+            Intent monitornigIntent = new Intent(DogDetailsActivity.this, MonitoringActivity.class);
+            startActivity(monitornigIntent);
         });
     }
     // Method to request storage permission

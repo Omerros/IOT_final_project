@@ -1,9 +1,15 @@
 package com.example.chaquopy_tutorial;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.os.Build;
 import android.os.Environment;
+import android.util.Log;
+
+import androidx.core.app.NotificationCompat;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,6 +19,23 @@ import java.util.Date;
 import java.util.Locale;
 public class Utils
 {
+    public static void showNotification(MonitoringActivity monitoringActivity, String notificationTitle, String s) {
+        NotificationManager notificationManager = (NotificationManager) monitoringActivity.getSystemService(Context.NOTIFICATION_SERVICE);
+        Log.i("bolbolon","im here");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("YOUR_CHANNEL_ID", "YOUR_CHANNEL_NAME", NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(monitoringActivity, "YOUR_CHANNEL_ID")
+                .setContentTitle(notificationTitle)
+                .setContentText(s)
+                .setSmallIcon(R.drawable.ic_notification) // Set the icon for the notification
+                .setAutoCancel(true);
+
+        notificationManager.notify(1, builder.build());
+    }
+
     public static class FileUtil {
 
         public static String saveBitmapToInternalStorage(Context context, Bitmap bitmap) {
@@ -34,6 +57,9 @@ public class Utils
                 e.printStackTrace();
                 return null; // Return null if there was an error saving the image
             }
+        }
+        public static void showNotification(Context context, String title, String message) {
+
         }
     }
 }

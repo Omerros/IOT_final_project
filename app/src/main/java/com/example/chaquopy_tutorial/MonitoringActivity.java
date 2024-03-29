@@ -65,6 +65,8 @@ public class MonitoringActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.btnApply).setOnClickListener(view -> {
+            Utils.showNotification(this, "Notification Title", "This is the notification message.");
+
             int hour = timePicker.getCurrentHour();
             int minute = timePicker.getCurrentMinute();
             int lowerTemp = lowerTempPicker.getValue();

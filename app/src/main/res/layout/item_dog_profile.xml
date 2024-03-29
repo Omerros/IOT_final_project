@@ -43,9 +43,10 @@
 
     <ImageView
         android:id="@+id/btnDelete"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/icons8_delete_24"
-        android:contentDescription="Delete" />
+        android:layout_marginTop="30dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:contentDescription="Delete"
+        android:src="@drawable/ic_delete" />
 
 </LinearLayout>

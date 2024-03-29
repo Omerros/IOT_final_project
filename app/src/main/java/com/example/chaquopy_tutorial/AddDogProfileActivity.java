@@ -1,4 +1,5 @@
 package com.example.chaquopy_tutorial;
+import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -7,6 +8,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -17,7 +19,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
-public class AddDogProfileActivity extends Activity {
+public class AddDogProfileActivity extends AppCompatActivity {
     private EditText etName, etTargetSteps;
     private Spinner spinnerDogBreed;
     private Button btnSave;
@@ -30,6 +32,7 @@ public class AddDogProfileActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_dog_profile);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         etName = findViewById(R.id.etName);
         spinnerDogBreed = findViewById(R.id.spinnerDogBreed);
@@ -98,5 +101,13 @@ public class AddDogProfileActivity extends Activity {
                 photoPath = Utils.FileUtil.saveBitmapToInternalStorage(this, imageBitmap);
             }
         }
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish(); // Close the activity when the back button is pressed
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

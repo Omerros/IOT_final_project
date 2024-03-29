@@ -2,6 +2,7 @@ package com.example.chaquopy_tutorial;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.NumberPicker;
 import android.widget.Switch;
 import android.widget.TimePicker;
@@ -20,6 +21,7 @@ public class MonitoringActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monitoring);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         timePicker = findViewById(R.id.timePicker);
         timePicker.setIs24HourView(true);
@@ -28,6 +30,7 @@ public class MonitoringActivity extends AppCompatActivity {
         upperTempPicker = findViewById(R.id.upperTempPicker);
         switchNotifyDark = findViewById(R.id.switchNotifyDark);
 
+        upperTempPicker = findViewById(R.id.upperTempPicker);
         sharedPreferences = getSharedPreferences("MonitoringSettings", MODE_PRIVATE);
 
         // Set the range for the temperature pickers to 0°C to 50°C
@@ -35,6 +38,11 @@ public class MonitoringActivity extends AppCompatActivity {
         lowerTempPicker.setMaxValue(50);
         upperTempPicker.setMinValue(0);
         upperTempPicker.setMaxValue(50);
+
+        lowerTempPicker.setValue(18);
+        upperTempPicker.setValue(28);
+        timePicker.setCurrentHour(0);
+        timePicker.setCurrentMinute(0);
 
         lowerTempPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
             int upperTemp = upperTempPicker.getValue();
@@ -79,5 +87,13 @@ public class MonitoringActivity extends AppCompatActivity {
             String message = "Settings applied: Time - " + hour + " hours " + minute + " minutes, Temp Range - " + lowerTemp + "°C to " + upperTemp + "°C, Notify in dark: " + notifyDark;
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         });
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish(); // Close the activity when the back button is pressed
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

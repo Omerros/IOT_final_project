@@ -34,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference dRef;
     BroadcastReceiver receiver;
 
+    Intent serviceIntent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         recyclerView.setAdapter(adapter);
 
-        Intent serviceIntent = new Intent(this, DataUpdateService.class);
+        serviceIntent = new Intent(this, DataUpdateService.class);
         startService(serviceIntent);
         // Register BroadcastReceiver to receive data update broadcasts from DataUpdateService
         IntentFilter filter = new IntentFilter("DATA_UPDATED");
@@ -81,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopService(serviceIntent);
         unregisterReceiver(receiver);
     }
 

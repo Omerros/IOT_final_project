@@ -55,7 +55,7 @@ public class DataUpdateService extends Service {
         startForeground(NOTIFICATION_ID, createNotification());
         scheduleDataUpdate();
         loadDataFromFirebase();
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     private void scheduleDataUpdate() {

@@ -39,6 +39,10 @@
         <activity android:name=".ProgressChartActivity" />
         <activity android:name=".MonitoringActivity" />
         <activity android:name=".StartWalkActivity" />
+        <service
+            android:name=".DataUpdateService"
+            android:enabled="true"
+            android:exported="false" />
 
     </application>
 </manifest>

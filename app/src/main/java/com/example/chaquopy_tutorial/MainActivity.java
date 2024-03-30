@@ -5,30 +5,24 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private List<DogProfile> dogProfiles;
     private FloatingActionButton btnAddProfile;
     DatabaseReference dRef;
+    BroadcastReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,26 +50,18 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         recyclerView.setAdapter(adapter);
 
-        dRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        Intent serviceIntent = new Intent(this, DataUpdateService.class);
+        startService(serviceIntent);
+        // Register BroadcastReceiver to receive data update broadcasts from DataUpdateService
+        IntentFilter filter = new IntentFilter("DATA_UPDATED");
+        receiver = new BroadcastReceiver() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    dogProfiles.clear();
-
-                    for (DataSnapshot dogSnapshot : dataSnapshot.getChildren()) {
-                        DogProfile dog = dogSnapshot.getValue(DogProfile.class);
-                        Log.i("firebase", "Read new dog: " + dog);
-                        dogProfiles.add(dog);
-                    }
-                    // Notify adapter after adding data
-                    adapter.notifyDataSetChanged();
-                }
+            public void onReceive(Context context, Intent intent) {
+                // Update dogProfiles list and notify adapter
+                updateDogProfiles();
             }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+        };
+        registerReceiver(receiver, filter);
 
         btnAddProfile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,6 +73,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // No need to start the foreground service here, as it is already started once in the MainActivity
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == ADD_DOG_PROFILE_REQUEST_CODE && resultCode == RESULT_OK) {
@@ -93,5 +92,29 @@ public class MainActivity extends AppCompatActivity {
             dogProfiles.add(newProfile);
             adapter.notifyDataSetChanged();
         }
+    }
+
+    // Method to update dogProfiles list and notify adapter
+    private void updateDogProfiles() {
+        dRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    dogProfiles.clear();
+                    for (DataSnapshot dogSnapshot : dataSnapshot.getChildren()) {
+                        DogProfile dog = dogSnapshot.getValue(DogProfile.class);
+                        Log.i("firebase", "Read new dog: " + dog);
+                        dogProfiles.add(dog);
+                    }
+                    adapter.updateData(dogProfiles);
+                    adapter.notifyDataSetChanged(); // Notify adapter of data change
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("Firebase", "Error retrieving data: " + databaseError.getMessage());
+            }
+        });
     }
 }

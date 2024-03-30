@@ -13,17 +13,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.chaquopy_tutorial.DogProfile;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
 public class DogProfileAdapter extends RecyclerView.Adapter<DogProfileAdapter.ViewHolder> {
     private Context context;
     private List<DogProfile> dogProfiles;
-    private DatabaseReference dRef;
+    private DatabaseReference dRef; // Reference to Firebase database
 
     public DogProfileAdapter(Context context, List<DogProfile> dogProfiles, DatabaseReference dRef) {
         this.context = context;
@@ -84,6 +84,12 @@ public class DogProfileAdapter extends RecyclerView.Adapter<DogProfileAdapter.Vi
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }
+
+    public void updateData(List<DogProfile> updatedData) {
+        dogProfiles = updatedData;
+        notifyDataSetChanged();
+    }
+
 
     private void deleteDogProfile(int position) {
         DogProfile dogProfile = dogProfiles.get(position);

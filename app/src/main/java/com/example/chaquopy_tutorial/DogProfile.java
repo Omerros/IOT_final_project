@@ -10,16 +10,18 @@ public class DogProfile implements Serializable {
     private String photoPath;
     private int targetSteps;
     private Map<String, List<Object>> deviceData;
+    private String alarm;
 
     public DogProfile() {}
 
-    public DogProfile(int id, String name, String breed, String photoPath, int targetSteps, Map<String, List<Object>> deviceData) {
+    public DogProfile(int id, String name, String breed, String photoPath, int targetSteps, Map<String, List<Object>> deviceData, String alarm) {
         this.id = id;
         this.name = name;
         this.breed = breed;
         this.photoPath = photoPath;
         this.targetSteps = targetSteps;
         this.deviceData = deviceData;
+        this.alarm = alarm;
     }
 
     public int getId() {
@@ -70,7 +72,15 @@ public class DogProfile implements Serializable {
         this.deviceData = deviceData;
     }
 
+    public String getAlarm() {
+        return alarm;
+    }
+
+    public void setAlarm(String alarm) {
+        this.alarm = alarm;
+    }
+
     public String toString() {
-        return "DogProfile { id = " + id + ", name = " + name + ", breed = " + breed + ", targetSteps = " + targetSteps + ", deviceData = " + deviceData + " }";
+        return "DogProfile { id = " + id + ", name = " + name + ", breed = " + breed + ", targetSteps = " + targetSteps + ", deviceData = " + deviceData + ", alarm = " + alarm + " }";
     }
 }

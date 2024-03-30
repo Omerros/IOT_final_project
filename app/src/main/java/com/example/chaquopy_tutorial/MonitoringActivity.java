@@ -1,5 +1,6 @@
 package com.example.chaquopy_tutorial;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -8,6 +9,9 @@ import android.widget.Switch;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DatabaseReference;
 
 public class MonitoringActivity extends AppCompatActivity {
 
@@ -78,17 +82,25 @@ public class MonitoringActivity extends AppCompatActivity {
                 return; // Prevent settings from being applied
             }
 
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt("hour", hour);
-            editor.putInt("minute", minute);
-            editor.putInt("lowerTemp", lowerTemp);
-            editor.putInt("upperTemp", upperTemp);
-            editor.putBoolean("notifyDark", notifyDark);
-            editor.apply(); // Apply changes
-
-            String message = "Settings applied: Time - " + hour + " hours " + minute + " minutes, Temp Range - " + lowerTemp + "°C to " + upperTemp + "°C, Notify in dark: " + notifyDark;
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            saveAlarmtoFirebase(hour, minute, lowerTemp, upperTemp, notifyDark);
         });
+    }
+
+    public void saveAlarmtoFirebase(int hour, int minute, int lowerTemp, int upperTemp, boolean notifyDark) {
+        Intent intent = getIntent();q
+        DogProfile dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
+        int dogId = dogProfile.getId();
+        DatabaseReference dogRef = FirebaseDatabase.getInstance().getReference("dogs").child(String.valueOf(dogId));
+        dogRef.child("alarm").setValue(hour + "," + minute + "," + lowerTemp + "," + upperTemp + "," + notifyDark)
+                .addOnSuccessListener(aVoid -> {
+                    // Settings applied successfully
+                    String message = "Settings applied: Time - " + hour + " hours " + minute + " minutes, Temp Range - " + lowerTemp + "°C to " + upperTemp + "°C, Notify in dark: " + notifyDark;
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+                })
+                .addOnFailureListener(e -> {
+                    // Failed to update settings
+                    Toast.makeText(this, "Failed to apply settings", Toast.LENGTH_SHORT).show();
+                });
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

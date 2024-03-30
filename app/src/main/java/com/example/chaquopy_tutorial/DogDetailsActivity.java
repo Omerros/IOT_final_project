@@ -102,10 +102,12 @@ public class DogDetailsActivity extends AppCompatActivity {
         });
         btnStartWalk.setOnClickListener(v -> {
             Intent startWalkIntent = new Intent(DogDetailsActivity.this, StartWalkActivity.class);
+            startWalkIntent.putExtra("dogProfile", dogProfile);
             startActivity(startWalkIntent);
         });
         btnSetAlarm.setOnClickListener(v -> {
             Intent monitornigIntent = new Intent(DogDetailsActivity.this, MonitoringActivity.class);
+            monitornigIntent.putExtra("dogProfile", dogProfile);
             startActivity(monitornigIntent);
         });
     }

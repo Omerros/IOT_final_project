@@ -144,8 +144,8 @@ public class ProgressChartActivity extends AppCompatActivity {
                 Log.e("image_loader", "Invalid photo path: " + photoPath);
             }
         }
-
-        populateStepsData(dogProfile.getDeviceData());
+        targetSteps = dogProfile.getTargetSteps();
+        populateStepsData(dogProfile.getDeviceData() );
 
         // Separate the stepsData into weekly data
         try {
@@ -178,7 +178,7 @@ public class ProgressChartActivity extends AppCompatActivity {
 
         btnNext.setOnClickListener(view -> {
             if (isMonthlyView) {
-                if (currentMonth < monthlyData.size()) {
+                if (currentMonth <= monthlyData.size()) {
                     currentMonth++;
                     updateChart(tvCurrentWeek);
                 }

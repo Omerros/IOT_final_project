@@ -15,8 +15,10 @@ import android.widget.TextView;
 
 import java.time.DayOfWeek;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -32,6 +34,11 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -106,7 +113,6 @@ public class ProgressChartActivity extends AppCompatActivity {
         // Load the dog image
         Intent intent = getIntent();
         DogProfile dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
-        Log.d("image_loader_chart", "null dogo");
         if (dogProfile != null) {
             dogName.setText(dogProfile.getName());
             String photoPath = dogProfile.getPhotoPath();
@@ -116,7 +122,6 @@ public class ProgressChartActivity extends AppCompatActivity {
             requestOptions.error(R.drawable.ic_launcher_background);
 
             if (photoPath != null && !photoPath.isEmpty()) {
-
                 Glide.with(this)
                         .load(photoPath)
                         .apply(requestOptions)
@@ -139,8 +144,29 @@ public class ProgressChartActivity extends AppCompatActivity {
             }
         }
 
-        // Populate stepsData with your data
-        populateStepsData();
+        DatabaseReference dRef = FirebaseDatabase.getInstance().getReference("dogs");
+        dRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                DataSnapshot dogSnapshot = dataSnapshot.child(String.valueOf(dogProfile.getId()));
+                if (dogSnapshot.exists()) {
+                    // Retrieve deviceData from Firebase for the specific dog profile
+                    DataSnapshot deviceDataSnapshot = dogSnapshot.child("deviceData");
+                    Map<String,Map<String,String>> deviceData = new HashMap<>();
+                    for (DataSnapshot childSnapshot : deviceDataSnapshot.getChildren()) {
+                        Map<String, String> entry = (Map<String, String>) childSnapshot.getValue(); // Each entry in deviceData
+                        //deviceData.add(entry);
+                    }
+                    // Populate stepsData
+                    populateStepsData(deviceData);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("Firebase", "Error retrieving device data: " + databaseError.getMessage());
+            }
+        });
 
         // Separate the stepsData into weekly data
         try {
@@ -437,9 +463,40 @@ public class ProgressChartActivity extends AppCompatActivity {
         return weekDays;
     }
 
-    private void populateStepsData() {
-        // Populate your stepsData here
-        // Example:
+    private void populateStepsData(Map<String,Map<String,String>> deviceData) {
+//        stepsData.clear();
+//        Log.d("fuck", "entered");
+//        // Iterate over device data and populate stepsData
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+//        Calendar calendar = Calendar.getInstance();
+//
+//        // Iterate over deviceData
+//        for (int i = 0; i < deviceData.size(); i++) {
+//            // Extract date and steps for the day
+//            String dateString = (String) deviceData.get(i);
+//            int steps = (int) deviceData.get(i + 1);
+//
+//            // Parse the date string and set it to the calendar
+//            try {
+//                Date date = dateFormat.parse(dateString);
+//                assert date != null;
+//                calendar.setTime(date);
+//
+//                // Format the date to match the desired format
+//                dateString = dateFormat.format(calendar.getTime());
+//
+//                // Update stepsData with aggregated steps for the day
+//                if (stepsData.containsKey(dateString)) {
+//                    int aggregatedSteps = stepsData.get(dateString) + steps;
+//                    stepsData.put(dateString, aggregatedSteps);
+//                } else {
+//                    stepsData.put(dateString, steps);
+//                }
+//            } catch (ParseException e) {
+//                e.printStackTrace();
+//            }
+//        }
+
         stepsData.put("06/01/2024", 9500);
         stepsData.put("07/01/2024", 9500);
         stepsData.put("11/01/2024", 9500);

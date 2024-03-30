@@ -12,7 +12,7 @@ import com.google.firebase.database.FirebaseDatabase;
 public class DogManager {
     public static DogProfile addNewDog(int id, String name, String breed, String photoPath, int targetSteps) {
         DatabaseReference dRef = FirebaseDatabase.getInstance().getReference("dogs");
-        DogProfile newDog = new DogProfile(id, name, breed, photoPath, targetSteps);
+        DogProfile newDog = new DogProfile(id, name, breed, photoPath, targetSteps, null);
         dRef.child(String.valueOf(newDog.getId())).setValue(newDog)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

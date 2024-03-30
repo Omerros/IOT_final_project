@@ -13,10 +13,13 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.text.DateFormat;
 import java.time.DayOfWeek;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -32,6 +35,11 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -106,7 +114,6 @@ public class ProgressChartActivity extends AppCompatActivity {
         // Load the dog image
         Intent intent = getIntent();
         DogProfile dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
-        Log.d("image_loader_chart", "null dogo");
         if (dogProfile != null) {
             dogName.setText(dogProfile.getName());
             String photoPath = dogProfile.getPhotoPath();
@@ -116,7 +123,6 @@ public class ProgressChartActivity extends AppCompatActivity {
             requestOptions.error(R.drawable.ic_launcher_background);
 
             if (photoPath != null && !photoPath.isEmpty()) {
-
                 Glide.with(this)
                         .load(photoPath)
                         .apply(requestOptions)
@@ -139,8 +145,7 @@ public class ProgressChartActivity extends AppCompatActivity {
             }
         }
 
-        // Populate stepsData with your data
-        populateStepsData();
+        populateStepsData(dogProfile.getDeviceData());
 
         // Separate the stepsData into weekly data
         try {
@@ -437,26 +442,29 @@ public class ProgressChartActivity extends AppCompatActivity {
         return weekDays;
     }
 
-    private void populateStepsData() {
-        // Populate your stepsData here
-        // Example:
-        stepsData.put("06/01/2024", 9500);
-        stepsData.put("07/01/2024", 9500);
-        stepsData.put("11/01/2024", 9500);
-        stepsData.put("11/02/2024", 9500);
-        stepsData.put("11/03/2024", 13500);
-        stepsData.put("14/03/2024", 12000);
-        stepsData.put("15/03/2024", 11500);
-        stepsData.put("16/03/2024", 11000);
-        stepsData.put("19/03/2024", 9500);
-        stepsData.put("20/03/2024", 9000);
-        stepsData.put("24/03/2024", 11500);
-        stepsData.put("25/03/2024", 11000);
-        stepsData.put("26/03/2024", 9500);
-        stepsData.put("27/03/2024", 9000);
-        stepsData.put("28/03/2024", 3500);
+    private void populateStepsData(Map<String, List<Object>> deviceData) {
+        stepsData.clear();
+        // Date format for parsing and formatting
+        DateFormat inputDateFormat = new SimpleDateFormat("EEEE, MMMM dd yyyy HH:mm:ss", Locale.ENGLISH);
+        DateFormat outputDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
 
-        // Add more data...
+        // Iterate over device data
+        for (Map.Entry<String, List<Object>> entry : deviceData.entrySet()) {
+            List<Object> data = entry.getValue();
+            String dateString = (String) data.get(0); // Date string
+            int steps = (int) (long) data.get(1); // Steps
+
+            // Parse date string
+            try {
+                Date date = inputDateFormat.parse(dateString);
+                String formattedDate = outputDateFormat.format(date); // Format date as "MM/dd/yyyy"
+
+                // Aggregate steps for each date
+                stepsData.put(formattedDate, stepsData.getOrDefault(formattedDate, 0) + steps);
+            } catch (ParseException e) {
+                Log.w("populateStepsData", "failed to parse. skipping: " + e);
+            }
+        }
 
         // Fill in the missing dates and ensure the range starts with Sunday and ends with Saturday
         fillMissingDates();
@@ -559,8 +567,6 @@ public class ProgressChartActivity extends AppCompatActivity {
             stepsData.put(entry.getKey().format(formatter), entry.getValue());
         }
     }
-
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

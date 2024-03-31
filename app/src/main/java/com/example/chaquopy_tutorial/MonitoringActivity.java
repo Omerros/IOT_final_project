@@ -87,7 +87,7 @@ public class MonitoringActivity extends AppCompatActivity {
     }
 
     public void saveAlarmtoFirebase(int hour, int minute, int lowerTemp, int upperTemp, boolean notifyDark) {
-        Intent intent = getIntent();q
+        Intent intent = getIntent();
         DogProfile dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
         int dogId = dogProfile.getId();
         DatabaseReference dogRef = FirebaseDatabase.getInstance().getReference("dogs").child(String.valueOf(dogId));

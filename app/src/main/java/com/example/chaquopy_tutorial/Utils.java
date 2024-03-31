@@ -19,15 +19,15 @@ import java.util.Date;
 import java.util.Locale;
 public class Utils
 {
-    public static void showNotification(MonitoringActivity monitoringActivity, String notificationTitle, String s) {
-        NotificationManager notificationManager = (NotificationManager) monitoringActivity.getSystemService(Context.NOTIFICATION_SERVICE);
+    public static void showNotification(Context Context, String notificationTitle, String s) {
+        NotificationManager notificationManager = (NotificationManager) Context.getSystemService(Context.NOTIFICATION_SERVICE);
         Log.i("bolbolon","im here");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel("YOUR_CHANNEL_ID", "YOUR_CHANNEL_NAME", NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
         }
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(monitoringActivity, "YOUR_CHANNEL_ID")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(Context, "YOUR_CHANNEL_ID")
                 .setContentTitle(notificationTitle)
                 .setContentText(s)
                 .setSmallIcon(R.drawable.ic_notification) // Set the icon for the notification

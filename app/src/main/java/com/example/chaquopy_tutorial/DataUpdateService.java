@@ -25,6 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,9 +35,10 @@ public class DataUpdateService extends Service {
     private static final String CHANNEL_ID = "DataUpdateChannel";
     private static final String CHANNEL_NAME = "Data Update Channel";
     private static final long INTERVAL_MILLIS = 15 * 1000; // 15 seconds
-
     private DatabaseReference dRef;
     private List<DogProfile> dogProfiles;
+    private Map<String, Long> lastAlarmTimeMapTemp = new HashMap<>();
+    private Map<String, Long> lastAlarmTimeMapDark = new HashMap<>();
 
     @Override
     public void onCreate() {
@@ -128,8 +130,24 @@ public class DataUpdateService extends Service {
             }
         });
     }
-
+    private boolean alarmCooldownFinished(Map<String, Long> lastAlarmTimeMap, String dogName) {
+        long lastAlarmTime = lastAlarmTimeMap.get(dogName);
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastAlarmTime < 10 * 60 * 1000) { // 10 minutes in milliseconds
+            return false;
+        }
+        return true;
+    }
     private void checkAlarmThresholds(DogProfile dog) {
+        // Check alarm cooldown
+        boolean cooldownTempFinished = true;
+        boolean cooldownDarkFinished = true;
+        if (lastAlarmTimeMapTemp.containsKey(dog.getName())) {
+            cooldownTempFinished = alarmCooldownFinished(lastAlarmTimeMapTemp, dog.getName());
+        }
+        if (lastAlarmTimeMapDark.containsKey(dog.getName())) {
+            cooldownDarkFinished = alarmCooldownFinished(lastAlarmTimeMapDark, dog.getName());
+        }
         String alarmData = dog.getAlarm();
         if (alarmData != null && !alarmData.isEmpty()) {
             String[] alarmParts = alarmData.split(",");
@@ -185,9 +203,20 @@ public class DataUpdateService extends Service {
 
                     // Check if 90% or more samples breach alarm conditions
                     if (totalSamples > 0 && alarmBreachesTemp >= totalSamples * 0.9) {
-                        sendTemperatureAlarmNotification(dog.getName());
-                    } else if (totalSamples > 0 && alarmBreachesDark >= totalSamples * 0.9){
-                        sendDarknessAlarmNotification(dog.getName());
+                        if (cooldownTempFinished) {
+                            lastAlarmTimeMapTemp.put(dog.getName(), System.currentTimeMillis());
+                            sendTemperatureAlarmNotification(dog.getName());
+                        } else {
+                            Log.i("Alarm", "Skipping temperature alarm for " + dog.getName() + ". Last alarm triggered recently.");
+                        }
+                    }
+                    if (totalSamples > 0 && alarmBreachesDark >= totalSamples * 0.9) {
+                        if (cooldownDarkFinished) {
+                            lastAlarmTimeMapDark.put(dog.getName(), System.currentTimeMillis());
+                            sendDarknessAlarmNotification(dog.getName());
+                        } else {
+                            Log.i("Alarm", "Skipping darkness alarm for " + dog.getName() + ". Last alarm triggered recently.");
+                        }
                     }
                 } else {
                     Log.e("Alarm", "No device data available");

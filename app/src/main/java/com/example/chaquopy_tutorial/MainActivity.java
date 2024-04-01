@@ -12,7 +12,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -21,9 +20,6 @@ import java.util.List;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
     private static final int ADD_DOG_PROFILE_REQUEST_CODE = 1;
@@ -60,7 +56,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 // Update dogProfiles list and notify adapter
-                updateDogProfiles();
+                List<DogProfile> updatedDogProfiles = (List<DogProfile>) intent.getSerializableExtra("dogProfiles");
+                if (updatedDogProfiles != null) {
+                    dogProfiles.clear();
+                    dogProfiles.addAll(updatedDogProfiles);
+                    adapter.notifyDataSetChanged(); // Notify adapter of data change
+                }
+                Log.i("MainActivity", "got updated dog list from broadcast");
             }
         };
         registerReceiver(receiver, filter);
@@ -95,29 +97,5 @@ public class MainActivity extends AppCompatActivity {
             dogProfiles.add(newProfile);
             adapter.notifyDataSetChanged();
         }
-    }
-
-    // Method to update dogProfiles list and notify adapter
-    private void updateDogProfiles() {
-        dRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    dogProfiles.clear();
-                    for (DataSnapshot dogSnapshot : dataSnapshot.getChildren()) {
-                        DogProfile dog = dogSnapshot.getValue(DogProfile.class);
-                        Log.i("firebase", "Read new dog: " + dog);
-                        dogProfiles.add(dog);
-                    }
-                    adapter.updateData(dogProfiles);
-                    adapter.notifyDataSetChanged(); // Notify adapter of data change
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e("Firebase", "Error retrieving data: " + databaseError.getMessage());
-            }
-        });
     }
 }

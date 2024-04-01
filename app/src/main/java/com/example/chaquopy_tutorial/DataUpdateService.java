@@ -22,6 +22,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -119,6 +120,7 @@ public class DataUpdateService extends Service {
                     // Send broadcast to notify MainActivity of updated data
                     Intent broadcastIntent = new Intent();
                     Log.i("DataUpdateService", "Sending broadcast");
+                    broadcastIntent.putExtra("dogProfiles", (Serializable) dogProfiles);
                     broadcastIntent.setAction("DATA_UPDATED");
                     sendBroadcast(broadcastIntent);
                 }

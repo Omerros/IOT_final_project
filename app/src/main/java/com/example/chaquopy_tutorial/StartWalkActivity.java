@@ -68,7 +68,7 @@ public class StartWalkActivity extends AppCompatActivity {
                                             long currentTimeMillis = System.currentTimeMillis();
                                             if (timestampMillis > lastUpdateTimeStamp) {
                                                 lastUpdateTimeStamp = currentTimeMillis;
-                                                long newStepCount = Long.parseLong((String) record.get(1));
+                                                long newStepCount = (long) record.get(1);
                                                 updateStepCount(newStepCount);
                                                 if (stepCount >= targetValue) {
                                                     finishWalk();
@@ -100,7 +100,7 @@ public class StartWalkActivity extends AppCompatActivity {
         if (!targetString.isEmpty()) {
             targetValue = Long.parseLong(targetString);
             isWalkStarted = true;
-            Toast.makeText(StartWalkActivity.this, "Starting the walk activity with target: " + targetValue, Toast.LENGTH_SHORT).show();
+            Toast.makeText(StartWalkActivity.this, "Starting the walk activity with target: " + targetString, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(StartWalkActivity.this, "Please enter a target value", Toast.LENGTH_SHORT).show();
         }

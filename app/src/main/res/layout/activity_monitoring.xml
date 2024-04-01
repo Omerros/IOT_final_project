@@ -99,6 +99,7 @@
             android:id="@+id/upperTempPicker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
     </LinearLayout>
 
     <Switch
@@ -109,12 +110,35 @@
         android:text="Notify when in dark"
         android:textSize="20sp" />
 
-    <Button
-        android:id="@+id/btnApply"
+    <TextView
+        android:id="@+id/tvAlarmStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Apply" />
+        android:text="Alarm: No Set"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:layout_marginTop="16dp" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnApply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Apply" />
+
+        <Button
+            android:id="@+id/btnTurnOffAlarm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Turn Off Alarm" />
+    </LinearLayout>
 
 </LinearLayout>

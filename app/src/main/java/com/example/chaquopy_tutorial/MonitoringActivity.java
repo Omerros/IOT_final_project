@@ -1,11 +1,13 @@
 package com.example.chaquopy_tutorial;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,7 +21,10 @@ public class MonitoringActivity extends AppCompatActivity {
     private NumberPicker lowerTempPicker;
     private NumberPicker upperTempPicker;
     private Switch switchNotifyDark;
-    private SharedPreferences sharedPreferences;
+    private TextView tvAlarmStatus;
+    private Button btnTurnOffAlarm;
+    private DogProfile dogProfile;
+    private boolean isAlarmSet = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +38,13 @@ public class MonitoringActivity extends AppCompatActivity {
         lowerTempPicker = findViewById(R.id.lowerTempPicker);
         upperTempPicker = findViewById(R.id.upperTempPicker);
         switchNotifyDark = findViewById(R.id.switchNotifyDark);
+        tvAlarmStatus = findViewById(R.id.tvAlarmStatus);
+        btnTurnOffAlarm = findViewById(R.id.btnTurnOffAlarm);
 
         upperTempPicker = findViewById(R.id.upperTempPicker);
-        sharedPreferences = getSharedPreferences("MonitoringSettings", MODE_PRIVATE);
+
+        checkAlarmStatus();
+        btnTurnOffAlarm.setOnClickListener(v -> turnOffAlarm());
 
         // Set the range for the temperature pickers to 0°C to 50°C
         lowerTempPicker.setMinValue(0);
@@ -47,6 +56,15 @@ public class MonitoringActivity extends AppCompatActivity {
         upperTempPicker.setValue(28);
         timePicker.setCurrentHour(0);
         timePicker.setCurrentMinute(0);
+
+        Intent intent = getIntent();
+        dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
+
+        if (dogProfile.getAlarm() != null) {
+            tvAlarmStatus.setText("Alarm: Set");
+        } else {
+            btnTurnOffAlarm.setVisibility(View.GONE);
+        }
 
         lowerTempPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
             int upperTemp = upperTempPicker.getValue();
@@ -87,8 +105,6 @@ public class MonitoringActivity extends AppCompatActivity {
     }
 
     public void saveAlarmtoFirebase(int hour, int minute, int lowerTemp, int upperTemp, boolean notifyDark) {
-        Intent intent = getIntent();
-        DogProfile dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
         int dogId = dogProfile.getId();
         DatabaseReference dogRef = FirebaseDatabase.getInstance().getReference("dogs").child(String.valueOf(dogId));
         dogRef.child("alarm").setValue(hour + "," + minute + "," + lowerTemp + "," + upperTemp + "," + notifyDark)
@@ -101,6 +117,39 @@ public class MonitoringActivity extends AppCompatActivity {
                     // Failed to update settings
                     Toast.makeText(this, "Failed to apply settings", Toast.LENGTH_SHORT).show();
                 });
+        btnTurnOffAlarm.setVisibility(View.VISIBLE);
+    }
+
+    public void deleteAlarmtoFirebase() {
+        int dogId = dogProfile.getId();
+        DatabaseReference dogRef = FirebaseDatabase.getInstance().getReference("dogs").child(String.valueOf(dogId));
+        dogRef.child("alarm").removeValue()
+                .addOnSuccessListener(aVoid -> {
+                    // Settings applied successfully
+                    String message = "Alarm removed";
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+                })
+                .addOnFailureListener(e -> {
+                    // Failed to update settings
+                    Toast.makeText(this, "Failed to apply settings", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    // Method to check if alarm is set and update UI accordingly
+    private void checkAlarmStatus() {
+        if (isAlarmSet) {
+            tvAlarmStatus.setText("Alarm: Set");
+        } else {
+            tvAlarmStatus.setText("Alarm: Not Set");
+        }
+    }
+
+    // Method to turn off the alarm
+    private void turnOffAlarm() {
+        isAlarmSet = false;
+        deleteAlarmtoFirebase();
+        tvAlarmStatus.setText("Alarm: Not Set");
+        btnTurnOffAlarm.setVisibility(View.GONE);
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

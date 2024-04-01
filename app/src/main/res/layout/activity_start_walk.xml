@@ -7,10 +7,10 @@
     android:padding="16dp">
 
     <Button
-        android:id="@+id/btnConnectDevice"
+        android:id="@+id/btnVerifyDeviceConnection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Connect Device"
+        android:text="Verify Device Connection"
         android:layout_marginBottom="16dp"/>
 
     <TextView

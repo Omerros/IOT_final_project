@@ -1,33 +1,37 @@
 package com.example.chaquopy_tutorial;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class StartWalkActivity extends AppCompatActivity {
 
-    private Button btnConnectDevice;
+    private Button btnVerifyDeviceConnection;
+    private Button btnStartWalk;
     private TextView tvStepCount;
     private EditText etTargetValue;
-    private DatabaseReference networkReference;
-    private DatabaseReference stepReference;
     private long stepCount = 0;
-    private long targetValue = 0; // Added targetValue
-    private Handler handler = new Handler();
-    private Runnable updateStepCountRunnable;
+    private long targetValue = 0;
+    private boolean isWalkStarted = false;
+    BroadcastReceiver receiver;
+    private List<DogProfile> updatedDogProfiles;
+    private DogProfile dogProfile;
+    private long lastUpdateTimeStamp = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,106 +39,98 @@ public class StartWalkActivity extends AppCompatActivity {
         setContentView(R.layout.activity_start_walk);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        btnConnectDevice = findViewById(R.id.btnConnectDevice);
+        btnVerifyDeviceConnection = findViewById(R.id.btnVerifyDeviceConnection);
+        btnStartWalk = findViewById(R.id.btnStartWalk);
         tvStepCount = findViewById(R.id.tvStepCount);
-        etTargetValue = findViewById(R.id.etTargetValue); // Added etTargetValue
+        etTargetValue = findViewById(R.id.etTargetValue);
 
-        // Initialize Firebase Database reference
-        networkReference = FirebaseDatabase.getInstance().getReference("network");
-        stepReference = FirebaseDatabase.getInstance().getReference("steps");
+        Intent intent = getIntent();
+        dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
 
-        btnConnectDevice.setOnClickListener(v -> {
-            // Read the network value from Firebase
-            networkReference.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    DataSnapshot snapshot = task.getResult();
-                    if (snapshot.exists()) {
-                        String network = snapshot.getValue(String.class);
-                        // Check if the device is not connected to the home network
-                        if (!"home".equalsIgnoreCase(network)) {
-                            // Start the walk activity
-                            startWalkActivity();
-                        } else {
-                            // Prompt the user that the device is connected to the home network
-                            Toast.makeText(StartWalkActivity.this, "You are already connected to the home network", Toast.LENGTH_SHORT).show();
+        IntentFilter filter = new IntentFilter("DATA_UPDATED");
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                updatedDogProfiles = (List<DogProfile>) intent.getSerializableExtra("dogProfiles");
+                if (isWalkStarted && updatedDogProfiles != null) {
+                    for (DogProfile updatedProfile : updatedDogProfiles) {
+                        if (updatedProfile.getId() == dogProfile.getId()) {
+                            Map<String, List<Object>> deviceData = updatedProfile.getDeviceData();
+                            if (deviceData != null) {
+                                for (Map.Entry<String, List<Object>> entry : deviceData.entrySet()) {
+                                    List<Object> record = entry.getValue();
+                                    if (record != null) {
+                                        String timestampString = (String) record.get(0);
+                                        try {
+                                            SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, MMMM dd yyyy HH:mm:ss");
+                                            Date timestampDate = dateFormat.parse(timestampString);
+                                            long timestampMillis = timestampDate.getTime();
+                                            long currentTimeMillis = System.currentTimeMillis();
+                                            if (timestampMillis > lastUpdateTimeStamp) {
+                                                lastUpdateTimeStamp = currentTimeMillis;
+                                                long newStepCount = Long.parseLong((String) record.get(1));
+                                                updateStepCount(newStepCount);
+                                                if (stepCount >= targetValue) {
+                                                    finishWalk();
+                                                }
+                                            }
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            }
+                            break;
                         }
-                    } else {
-                        // Handle the case where the network value doesn't exist
-                        Toast.makeText(StartWalkActivity.this, "Network value not found in Firebase", Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    // Handle the case where reading from Firebase fails
-                    Toast.makeText(StartWalkActivity.this, "Failed to read network value from Firebase", Toast.LENGTH_SHORT).show();
                 }
-            });
+            }
+        };
+        registerReceiver(receiver, filter);
+
+        btnVerifyDeviceConnection.setOnClickListener(v -> {
+
         });
 
-        // Start updating step count
-        startUpdatingStepCount();
+        btnStartWalk.setOnClickListener(v -> startWalkActivity());
     }
 
-    // Method to start the walk activity
     private void startWalkActivity() {
-        // Get the target value entered by the user
         String targetString = etTargetValue.getText().toString();
         if (!targetString.isEmpty()) {
             targetValue = Long.parseLong(targetString);
-            // Start the walk activity here
+            isWalkStarted = true;
             Toast.makeText(StartWalkActivity.this, "Starting the walk activity with target: " + targetValue, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(StartWalkActivity.this, "Please enter a target value", Toast.LENGTH_SHORT).show();
         }
     }
 
-    // Method to start updating step count from Firebase
-    private void startUpdatingStepCount() {
-        // Start updating step count from Firebase every second
-        updateStepCountRunnable = new Runnable() {
-            @Override
-            public void run() {
-                updateStepCountFromFirebase();
-                handler.postDelayed(this, 1000); // Update every second
-            }
-        };
-        handler.post(updateStepCountRunnable);
+    private void updateStepCount(long newStepCount) {
+        if (lastUpdateTimeStamp != 0) {
+            stepCount = newStepCount;
+            tvStepCount.setText("Step Count: " + stepCount);
+        } else {
+            stepCount = newStepCount;
+            tvStepCount.setText("Step Count: " + stepCount);
+        }
     }
 
-    // Method to update step count from Firebase
-    private void updateStepCountFromFirebase() {
-        stepReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    long newStepCount = (long) dataSnapshot.getValue();
-                    long stepIncrement = newStepCount - stepCount;
-                    stepCount = newStepCount;
-                    // Update the TextView with the current step count
-                    tvStepCount.setText("Step Count: " + stepCount);
-                    // Check if the step count exceeds the target value
-                    if (stepCount >= targetValue) {
-                        Toast.makeText(StartWalkActivity.this, "Target achieved!", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle error
-            }
-        });
+    private void finishWalk() {
+        Utils.showNotification(this, "Walk", "Target steps achieved");
+        finish();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Remove the updateStepCountRunnable from the handler
-        handler.removeCallbacks(updateStepCountRunnable);
+        unregisterReceiver(receiver); // Unregister the broadcast receiver
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            finish(); // Close the activity when the back button is pressed
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);

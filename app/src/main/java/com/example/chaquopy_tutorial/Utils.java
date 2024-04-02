@@ -8,6 +8,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.ImageView;
 
 import androidx.core.app.NotificationCompat;
 
@@ -60,6 +61,19 @@ public class Utils
         }
         public static void showNotification(Context context, String title, String message) {
 
+        }
+    }
+
+    public static void updateIcons(ImageView iconDarkness, ImageView iconWhereabouts, String darkness, String whereAbouts) {
+        if (darkness.equals("dark")) {
+            iconDarkness.setImageResource(R.mipmap.ic_launcher_moon);
+        } else { // light
+            iconDarkness.setImageResource(R.mipmap.ic_launcher_sun);
+        }
+        if (whereAbouts.equals("in")) {
+            iconWhereabouts.setImageResource(R.mipmap.ic_indoors);
+        } else { // out
+            iconWhereabouts.setImageResource(R.mipmap.ic_outdoors);
         }
     }
 }

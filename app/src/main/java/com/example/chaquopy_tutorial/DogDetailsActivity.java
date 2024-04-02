@@ -1,7 +1,12 @@
 package com.example.chaquopy_tutorial;
 
+import static com.example.chaquopy_tutorial.Utils.updateIcons;
+
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -30,6 +35,7 @@ import android.os.Build;
 import androidx.core.content.ContextCompat;
 
 import java.io.File;
+import java.util.List;
 
 public class DogDetailsActivity extends AppCompatActivity {
 
@@ -37,7 +43,8 @@ public class DogDetailsActivity extends AppCompatActivity {
     private ImageView dogImage;
     private TextView dogName;
     private Button btnShowProgress, btnStartWalk, btnSetAlarm;
-
+    BroadcastReceiver receiver;
+    private DogProfile dogProfile;
     @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,9 +69,15 @@ public class DogDetailsActivity extends AppCompatActivity {
         }
 
         Intent intent = getIntent();
-        DogProfile dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
+        dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
         if (dogProfile != null) {
             dogName.setText(dogProfile.getName());
+            updateIcons(
+                    findViewById(R.id.iconDarkness),
+                    findViewById(R.id.iconWhereabouts),
+                    dogProfile.getLightDark(),
+                    dogProfile.getInOut()
+            );
             String photoPath = dogProfile.getPhotoPath();
             Log.d("image_loader_details", "Photo path: " + photoPath);
 
@@ -110,6 +123,30 @@ public class DogDetailsActivity extends AppCompatActivity {
             monitornigIntent.putExtra("dogProfile", dogProfile);
             startActivity(monitornigIntent);
         });
+
+        IntentFilter filter = new IntentFilter("DATA_UPDATED");
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // Update dogProfiles list and notify adapter
+                List<DogProfile> updatedDogProfiles = (List<DogProfile>) intent.getSerializableExtra("dogProfiles");
+                if (updatedDogProfiles != null) {
+                    for (DogProfile updatedProfile : updatedDogProfiles) {
+                        if (updatedProfile.getId() == dogProfile.getId()) {
+                            dogProfile = updatedProfile;
+                        }
+                    }
+                    updateIcons(
+                            findViewById(R.id.iconDarkness),
+                            findViewById(R.id.iconWhereabouts),
+                            dogProfile.getLightDark(),
+                            dogProfile.getInOut()
+                    );
+                }
+                Log.i("DogDetailsActivity", "got updated dog list from broadcast");
+            }
+        };
+        registerReceiver(receiver, filter);
     }
     // Method to request storage permission
     private void requestStoragePermission() {
@@ -129,7 +166,6 @@ public class DogDetailsActivity extends AppCompatActivity {
             }
         }
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {

@@ -81,6 +81,10 @@ public class DogProfile implements Serializable {
         return alarm;
     }
 
+    public void setAlarm(String alarm) {
+        this.alarm = alarm;
+    }
+
     public String getInOut() {
         return inOut;
     }
@@ -93,7 +97,7 @@ public class DogProfile implements Serializable {
         return lightDark;
     }
 
-    public void setLightDark(String name) {
+    public void setLightDark(String lightDark) {
         this.lightDark = lightDark;
     }
 
@@ -103,10 +107,6 @@ public class DogProfile implements Serializable {
 
     public void setWifi(String wifi) {
         this.name = wifi;
-    }
-
-    public void setAlarm(String alarm) {
-        this.alarm = alarm;
     }
 
     public String toString() {

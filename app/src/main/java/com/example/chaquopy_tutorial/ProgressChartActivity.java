@@ -1,7 +1,12 @@
 package com.example.chaquopy_tutorial;
 
+import static com.example.chaquopy_tutorial.Utils.updateIcons;
+
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -88,6 +93,7 @@ public class ProgressChartActivity extends AppCompatActivity {
     private TextView tvProgressToday;
     private ProgressBar progressBarToday;
     private int todaySteps = 0;
+    private DogProfile dogProfile;
     @SuppressLint("CheckResult")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,9 +119,15 @@ public class ProgressChartActivity extends AppCompatActivity {
 
         // Load the dog image
         Intent intent = getIntent();
-        DogProfile dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
+        dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
         if (dogProfile != null) {
             dogName.setText(dogProfile.getName());
+            updateIcons(
+                    findViewById(R.id.iconDarkness),
+                    findViewById(R.id.iconWhereabouts),
+                    dogProfile.getLightDark(),
+                    dogProfile.getInOut()
+            );
             String photoPath = dogProfile.getPhotoPath();
             Log.d("image_loader_chart", "Photo path: " + photoPath);
 
@@ -203,6 +215,30 @@ public class ProgressChartActivity extends AppCompatActivity {
                 updateChart(tvCurrentWeek);
             }
         });
+
+        IntentFilter filter = new IntentFilter("DATA_UPDATED");
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // Update dogProfiles list and notify adapter
+                List<DogProfile> updatedDogProfiles = (List<DogProfile>) intent.getSerializableExtra("dogProfiles");
+                if (updatedDogProfiles != null) {
+                    for (DogProfile updatedProfile : updatedDogProfiles) {
+                        if (updatedProfile.getId() == dogProfile.getId()) {
+                            dogProfile = updatedProfile;
+                        }
+                    }
+                    updateIcons(
+                            findViewById(R.id.iconDarkness),
+                            findViewById(R.id.iconWhereabouts),
+                            dogProfile.getLightDark(),
+                            dogProfile.getInOut()
+                    );
+                }
+                Log.i("DogDetailsActivity", "got updated dog list from broadcast");
+            }
+        };
+        registerReceiver(receiver, filter);
     }
 
     private void updateChart(TextView tvCurrentWeek) {

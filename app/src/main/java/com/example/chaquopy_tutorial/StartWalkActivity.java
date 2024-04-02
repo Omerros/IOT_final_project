@@ -21,9 +21,9 @@ import java.util.Map;
 
 public class StartWalkActivity extends AppCompatActivity {
 
-    private Button btnVerifyDeviceConnection;
     private Button btnStartWalk;
     private TextView tvStepCount;
+    private TextView tvConnectionStatus;
     private EditText etTargetValue;
     private long stepCount = 0;
     private long targetValue = 0;
@@ -39,13 +39,14 @@ public class StartWalkActivity extends AppCompatActivity {
         setContentView(R.layout.activity_start_walk);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        btnVerifyDeviceConnection = findViewById(R.id.btnVerifyDeviceConnection);
         btnStartWalk = findViewById(R.id.btnStartWalk);
         tvStepCount = findViewById(R.id.tvStepCount);
+        tvConnectionStatus = findViewById(R.id.tvConnectionStatus);
         etTargetValue = findViewById(R.id.etTargetValue);
 
         Intent intent = getIntent();
         dogProfile = (DogProfile) intent.getSerializableExtra("dogProfile");
+        tvConnectionStatus.setText("Connection Status: " + dogProfile.getWifi());
 
         IntentFilter filter = new IntentFilter("DATA_UPDATED");
         receiver = new BroadcastReceiver() {
@@ -55,6 +56,7 @@ public class StartWalkActivity extends AppCompatActivity {
                 if (isWalkStarted && updatedDogProfiles != null) {
                     for (DogProfile updatedProfile : updatedDogProfiles) {
                         if (updatedProfile.getId() == dogProfile.getId()) {
+                            tvConnectionStatus.setText("Connection Status: " + updatedProfile.getWifi());
                             Map<String, List<Object>> deviceData = updatedProfile.getDeviceData();
                             if (deviceData != null) {
                                 for (Map.Entry<String, List<Object>> entry : deviceData.entrySet()) {
@@ -87,10 +89,6 @@ public class StartWalkActivity extends AppCompatActivity {
             }
         };
         registerReceiver(receiver, filter);
-
-        btnVerifyDeviceConnection.setOnClickListener(v -> {
-
-        });
 
         btnStartWalk.setOnClickListener(v -> startWalkActivity());
     }

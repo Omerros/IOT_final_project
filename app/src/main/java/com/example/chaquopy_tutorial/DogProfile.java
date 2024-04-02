@@ -101,12 +101,10 @@ public class DogProfile implements Serializable {
         this.lightDark = lightDark;
     }
 
-    public String getWifi() {
-        return wifi;
-    }
+    public String getWifi() { return wifi; }
 
     public void setWifi(String wifi) {
-        this.name = wifi;
+        this.wifi = wifi;
     }
 
     public String toString() {

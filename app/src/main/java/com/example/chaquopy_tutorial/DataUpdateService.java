@@ -150,7 +150,7 @@ public class DataUpdateService extends Service {
                         List<Object> sample = entry.getValue();
                         String timestampString = (String) sample.get(0);
                         long temperature = (long) sample.get(2);
-                        long darkness = (long) sample.get(3); //TODO - change to string after updating the logic in the esp
+                        String darkness = (String) sample.get(4);
 
                         // Parse timestamp string to obtain milliseconds since epoch
                         try {
@@ -166,7 +166,7 @@ public class DataUpdateService extends Service {
                                     alarmBreachesTemp++;
                                 }
 
-                                if (darknessAlarmEnabled && darkness < 40) {
+                                if (darknessAlarmEnabled && darkness.equals("dark")) {
                                     alarmBreachesDark++;
                                 }
                             }

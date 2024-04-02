@@ -454,6 +454,7 @@ public class ProgressChartActivity extends AppCompatActivity {
             String dateString = (String) data.get(0); // Date string
             int steps = (int) (long) data.get(1); // Steps
 
+
             // Parse date string
             try {
                 Date date = inputDateFormat.parse(dateString);

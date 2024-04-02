@@ -11,10 +11,12 @@ public class DogProfile implements Serializable {
     private int targetSteps;
     private Map<String, List<Object>> deviceData;
     private String alarm;
-
+    private String inOut;
+    private String lightDark;
+    private String wifi;
     public DogProfile() {}
 
-    public DogProfile(int id, String name, String breed, String photoPath, int targetSteps, Map<String, List<Object>> deviceData, String alarm) {
+    public DogProfile(int id, String name, String breed, String photoPath, int targetSteps, Map<String, List<Object>> deviceData, String alarm, String inOut, String lightDark, String wifi) {
         this.id = id;
         this.name = name;
         this.breed = breed;
@@ -22,6 +24,9 @@ public class DogProfile implements Serializable {
         this.targetSteps = targetSteps;
         this.deviceData = deviceData;
         this.alarm = alarm;
+        this.inOut = inOut;
+        this.lightDark = lightDark;
+        this.wifi = wifi;
     }
 
     public int getId() {
@@ -74,6 +79,30 @@ public class DogProfile implements Serializable {
 
     public String getAlarm() {
         return alarm;
+    }
+
+    public String getInOut() {
+        return inOut;
+    }
+
+    public void setInOut(String inOut) {
+        this.inOut = inOut;
+    }
+
+    public String getLightDark() {
+        return lightDark;
+    }
+
+    public void setLightDark(String name) {
+        this.lightDark = lightDark;
+    }
+
+    public String getWifi() {
+        return wifi;
+    }
+
+    public void setWifi(String wifi) {
+        this.name = wifi;
     }
 
     public void setAlarm(String alarm) {

@@ -32,6 +32,7 @@ public class StartWalkActivity extends AppCompatActivity {
     private List<DogProfile> updatedDogProfiles;
     private DogProfile dogProfile;
     private long lastUpdateTimeStamp = 0;
+    long startWalkTimeMillis;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +60,7 @@ public class StartWalkActivity extends AppCompatActivity {
                             tvConnectionStatus.setText("Connection Status: " + updatedProfile.getWifi());
                             Map<String, List<Object>> deviceData = updatedProfile.getDeviceData();
                             if (deviceData != null) {
+                                long updatedSteps = 0;
                                 for (Map.Entry<String, List<Object>> entry : deviceData.entrySet()) {
                                     List<Object> record = entry.getValue();
                                     if (record != null) {
@@ -67,11 +69,9 @@ public class StartWalkActivity extends AppCompatActivity {
                                             SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, MMMM dd yyyy HH:mm:ss");
                                             Date timestampDate = dateFormat.parse(timestampString);
                                             long timestampMillis = timestampDate.getTime();
-                                            long currentTimeMillis = System.currentTimeMillis();
-                                            if (timestampMillis > lastUpdateTimeStamp) {
-                                                lastUpdateTimeStamp = currentTimeMillis;
+                                            if (timestampMillis > startWalkTimeMillis) {
                                                 long newStepCount = (long) record.get(1);
-                                                updateStepCount(newStepCount);
+                                                updatedSteps += newStepCount;
                                                 if (stepCount >= targetValue) {
                                                     finishWalk();
                                                 }
@@ -81,6 +81,7 @@ public class StartWalkActivity extends AppCompatActivity {
                                         }
                                     }
                                 }
+                                updateStepCount(updatedSteps);
                             }
                             break;
                         }
@@ -98,6 +99,8 @@ public class StartWalkActivity extends AppCompatActivity {
         if (!targetString.isEmpty()) {
             targetValue = Long.parseLong(targetString);
             isWalkStarted = true;
+            startWalkTimeMillis = System.currentTimeMillis();
+            updateStepCount(0);
             Toast.makeText(StartWalkActivity.this, "Starting the walk activity with target: " + targetString, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(StartWalkActivity.this, "Please enter a target value", Toast.LENGTH_SHORT).show();
@@ -105,13 +108,8 @@ public class StartWalkActivity extends AppCompatActivity {
     }
 
     private void updateStepCount(long newStepCount) {
-        if (lastUpdateTimeStamp != 0) {
-            stepCount = newStepCount;
-            tvStepCount.setText("Step Count: " + stepCount);
-        } else {
-            stepCount = newStepCount;
-            tvStepCount.setText("Step Count: " + stepCount);
-        }
+        stepCount = newStepCount;
+        tvStepCount.setText("Step Count: " + stepCount);
     }
 
     private void finishWalk() {

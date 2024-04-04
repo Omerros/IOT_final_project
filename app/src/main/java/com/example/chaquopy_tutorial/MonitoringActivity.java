@@ -87,7 +87,6 @@ public class MonitoringActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.btnApply).setOnClickListener(view -> {
-            Utils.showNotification(this, "Notification Title", "This is the notification message.");
 
             int hour = timePicker.getCurrentHour();
             int minute = timePicker.getCurrentMinute();
@@ -97,7 +96,7 @@ public class MonitoringActivity extends AppCompatActivity {
 
             if (lowerTemp >= upperTemp) {
                 Toast.makeText(this, "Lower bound cannot be equal to or greater than upper bound", Toast.LENGTH_SHORT).show();
-                return; // Prevent settings from being applied
+                return;
             }
 
             saveAlarmtoFirebase(hour, minute, lowerTemp, upperTemp, notifyDark);
@@ -117,6 +116,8 @@ public class MonitoringActivity extends AppCompatActivity {
                     // Failed to update settings
                     Toast.makeText(this, "Failed to apply settings", Toast.LENGTH_SHORT).show();
                 });
+        isAlarmSet = true;
+        checkAlarmStatus();
         btnTurnOffAlarm.setVisibility(View.VISIBLE);
     }
 

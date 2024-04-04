@@ -108,7 +108,7 @@ public class DataUpdateService extends Service {
     private boolean alarmCooldownFinished(Map<String, Long> lastAlarmTimeMap, String dogName) {
         long lastAlarmTime = lastAlarmTimeMap.get(dogName);
         long currentTime = System.currentTimeMillis();
-        if (currentTime - lastAlarmTime < 10 * 60 * 1000) { // 10 minutes in milliseconds
+        if (currentTime - lastAlarmTime < 1 * 60 * 1000) { // 10 minutes in milliseconds
             return false;
         }
         return true;
@@ -175,9 +175,9 @@ public class DataUpdateService extends Service {
                             Log.e("Alarm", "Error parsing timestamp: " + e.getMessage());
                         }
                     }
-
+                    Log.i("Alarm", "TotalSamples:  " + totalSamples);
                     // Check if 90% or more samples breach alarm conditions
-                    if (totalSamples > 0 && alarmBreachesTemp >= totalSamples * 0.9) {
+                    if (totalSamples > 0 && alarmBreachesTemp >= totalSamples * 0.1) {
                         if (cooldownTempFinished) {
                             lastAlarmTimeMapTemp.put(dog.getName(), System.currentTimeMillis());
                             sendTemperatureAlarmNotification(dog.getName());
@@ -185,7 +185,7 @@ public class DataUpdateService extends Service {
                             Log.i("Alarm", "Skipping temperature alarm for " + dog.getName() + ". Last alarm triggered recently.");
                         }
                     }
-                    if (totalSamples > 0 && alarmBreachesDark >= totalSamples * 0.9) {
+                    if (totalSamples > 0 && alarmBreachesDark >= totalSamples * 0.1) {
                         if (cooldownDarkFinished) {
                             lastAlarmTimeMapDark.put(dog.getName(), System.currentTimeMillis());
                             sendDarknessAlarmNotification(dog.getName());

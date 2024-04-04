@@ -24,6 +24,7 @@ public class Utils
         NotificationManager notificationManager = (NotificationManager) Context.getSystemService(Context.NOTIFICATION_SERVICE);
         Log.i("bolbolon","im here");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.i("bolbolon","im here1");
             NotificationChannel channel = new NotificationChannel("YOUR_CHANNEL_ID", "YOUR_CHANNEL_NAME", NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
         }
